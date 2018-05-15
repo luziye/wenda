@@ -23,7 +23,7 @@ public class LoginController {
     public String register(Model model, @RequestParam("username") String username,
                            @RequestParam("password") String password) {
         try {
-            Map<String, String> map = userService.register(username, password);
+            Map<String, Object> map = userService.register(username, password);
             if (map.containsKey("msg")) {
                 model.addAttribute("msg", map.get("msg"));
                 return "login";
@@ -40,7 +40,7 @@ public class LoginController {
                         @RequestParam("password") String password,
                         @RequestParam(value = "rememberme", defaultValue = "false")boolean rememberme) {
         try {
-            Map<String, String> map = userService.login(username, password);
+            Map<String, Object> map = userService.login(username, password);
             if (map.containsKey("msg")) {
                 model.addAttribute("msg", map.get("msg"));
                 return "login";
