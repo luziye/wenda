@@ -1,7 +1,9 @@
 package com.wenda.lzy;
 
+import com.wenda.lzy.dao.LoginTicketDao;
 import com.wenda.lzy.dao.QuestionDao;
 import com.wenda.lzy.dao.UserDao;
+import com.wenda.lzy.model.LoginTicket;
 import com.wenda.lzy.model.Question;
 import com.wenda.lzy.model.User;
 import org.junit.Assert;
@@ -26,37 +28,50 @@ public class InitDatabaseTest {
 
     @Autowired
     QuestionDao questionDao;
+
+    @Autowired
+    LoginTicketDao loginTicketDao;
     @Test
     public void initDatabase(){
-        Random random=new Random();
-        for (int i=0;i<10;i++){
-            User user=new User();
-            user.setHeadUrl(String.format("http://images.nowcoder.com/head/%dt.png",random.nextInt(1000)));
-            user.setName(String.format("USER%d", i));
-            user.setPassword("");
-            user.setSalt("");
-            userDao.addUser(user);
+//        Random random=new Random();
+//        for (int i=0;i<10;i++){
+//            User user=new User();
+//            user.setHeadUrl(String.format("http://images.nowcoder.com/head/%dt.png",random.nextInt(1000)));
+//            user.setName(String.format("USER%d", i));
+//            user.setPassword("");
+//            user.setSalt("");
+//            userDao.addUser(user);
+//
+//            user.setPassword("123456");
+//            userDao.updatePassword(user);
+//
+//            Question question=new Question();
+//            question.setCommentCount(i);
+//            Date date = new Date();
+//            date.setTime(date.getTime() + 1000 * 3600 * 5 * i);
+//            question.setCreatedDate(date);
+//            question.setUserId(i + 1);
+//            question.setTitle(String.format("TITLE{%d}", i));
+//            question.setContent(String.format("Balaababalalalal Content %d", i));
+//            questionDao.addQuestion(question);
+//
+//        }
+//        Assert.assertEquals("123456",userDao.selectById(1).getPassword());
+//
+//        userDao.deleteUser(2);
+//        Assert.assertNull(userDao.selectById(2));
+//
+//        List<Question> questions=questionDao.selectLatestQuestions(0,0,10);
+//        System.out.print(questions);
 
-            user.setPassword("123456");
-            userDao.updatePassword(user);
+        LoginTicket ticket=new LoginTicket();
+        ticket.setTicket("123");
+        ticket.setStatus(0);
+        ticket.setUserId(1);
+        Date date = new Date();
 
-            Question question=new Question();
-            question.setCommentCount(i);
-            Date date = new Date();
-            date.setTime(date.getTime() + 1000 * 3600 * 5 * i);
-            question.setCreatedDate(date);
-            question.setUserId(i + 1);
-            question.setTitle(String.format("TITLE{%d}", i));
-            question.setContent(String.format("Balaababalalalal Content %d", i));
-            questionDao.addQuestion(question);
+        ticket.setExpired(date);
+        loginTicketDao.addTicket(ticket);
 
-        }
-        Assert.assertEquals("123456",userDao.selectById(1).getPassword());
-
-        userDao.deleteUser(2);
-        Assert.assertNull(userDao.selectById(2));
-
-        List<Question> questions=questionDao.selectLatestQuestions(0,0,10);
-        System.out.print(questions);
     }
 }
