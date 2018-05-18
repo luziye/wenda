@@ -16,7 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Date;
 
 @Component
-public class PassportIntercepter implements HandlerInterceptor {
+public class LoginRequiredIntercepter implements HandlerInterceptor {
     @Autowired
     LoginTicketDao loginTicketDao;
 
@@ -28,23 +28,8 @@ public class PassportIntercepter implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String ticket = null;
-        Cookie[] x = request.getCookies();
-        if (x != null) {
-            for (Cookie c : x) {
-                if (c.getName().equals("ticket")) {
-                    ticket = c.getValue();
-                    break;
-                }
-            }
-        }
-        if (ticket != null) {
-            LoginTicket loginTicket = loginTicketDao.selectTicket(ticket);
-            if (loginTicket == null || loginTicket.getExpired().before(new Date()) || loginTicket.getStatus() != 0) {
-                return true;
-            }
-            User user = userDao.selectById(loginTicket.getUserId());
-            hostHolder.setUser(user);
+        if(hostHolder.getUser()==null){
+            response.sendRedirect("/relogin?next="+request.getRequestURI());
         }
         return true;
 
@@ -52,13 +37,11 @@ public class PassportIntercepter implements HandlerInterceptor {
 
     @Override
     public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
-        if (modelAndView != null && hostHolder.getUser() != null) {
-            modelAndView.addObject("user", hostHolder.getUser());
-        }
+
     }
 
     @Override
     public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
-        hostHolder.clear();
+
     }
 }

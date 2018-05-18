@@ -1,10 +1,12 @@
 package com.wenda.lzy.controller;
 
 import com.fasterxml.jackson.databind.ser.VirtualBeanPropertyWriter;
+import com.wenda.lzy.model.HostHolder;
 import com.wenda.lzy.model.Question;
 import com.wenda.lzy.model.ViewObject;
 import com.wenda.lzy.service.QuestionService;
 import com.wenda.lzy.service.UserService;
+import org.apache.catalina.Host;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,13 +28,16 @@ public class HomeController {
     @Autowired
     QuestionService questionService;
 
+    @Autowired
+    HostHolder hostHolder;
+
     public List<ViewObject> getQuestions(int userId, int offset, int limit) {
         List<Question> questions = questionService.getLatestQuestion(userId, offset, limit);
         List<ViewObject> vos = new ArrayList<>();
         for (Question question : questions) {
             ViewObject vo = new ViewObject();
             vo.set("question", question);
-            vo.set("user", userService.getUser(question.getUserId()));
+            vo.set("user", hostHolder.getUser());
             vos.add(vo);
         }
         return vos;

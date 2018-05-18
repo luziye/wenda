@@ -76,6 +76,10 @@ public class UserService {
         return map;
     }
 
+    public void logout(String ticket){
+        loginTicketDao.updateStatus(ticket,1);
+    }
+
     public String addLoginTicket(int userId) {
         LoginTicket ticket = new LoginTicket();
         Date now = new Date();

@@ -1,11 +1,14 @@
 package com.wenda.lzy.controller;
 
+import com.wenda.lzy.model.HostHolder;
 import com.wenda.lzy.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,9 +24,14 @@ public class LoginController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    HostHolder hostHolder;
+
     @RequestMapping(path = {"/reg/"}, method = RequestMethod.POST)
     public String register(Model model, @RequestParam("username") String username,
-                           @RequestParam("password") String password, HttpServletResponse response) {
+                           @RequestParam("password") String password,
+                           @RequestParam(value = "next", required = false) String next,
+                           HttpServletResponse response) {
         try {
             Map<String, Object> map = userService.register(username, password);
             if (map.containsKey("ticket")) {
@@ -31,6 +39,9 @@ public class LoginController {
 //                cookie.setMaxAge();
                 cookie.setPath("/");
                 response.addCookie(cookie);
+                if (StringUtils.isEmpty(next)) {
+                    return "redirect:" + next;
+                }
                 return "redirect:/";
             } else {
                 model.addAttribute("msg", map.get("msg"));
@@ -46,6 +57,7 @@ public class LoginController {
     @RequestMapping(path = {"/login"}, method = RequestMethod.POST)
     public String login(Model model, @RequestParam("username") String username,
                         @RequestParam("password") String password,
+                        @RequestParam(value = "next", required = false) String next,
                         @RequestParam(value = "rememberme", defaultValue = "false") boolean rememberme,
                         HttpServletResponse response) {
         try {
@@ -54,6 +66,9 @@ public class LoginController {
                 Cookie cookie = new Cookie("ticket", map.get("ticket").toString());
                 cookie.setPath("/");
                 response.addCookie(cookie);
+                if (StringUtils.isEmpty(next)) {
+                    return "redirect:" + next;
+                }
                 return "redirect:/";
             } else {
                 model.addAttribute("msg", map.get("msg"));
@@ -64,6 +79,18 @@ public class LoginController {
             logger.error("登陆异常" + e.getMessage());
             return "login";
         }
+    }
+
+    @RequestMapping(path = {"/reglogin"}, method = {RequestMethod.GET})
+    public String regloginPage(Model model, @RequestParam(value = "next", required = false) String next) {
+        model.addAttribute("next", next);
+        return "login";
+    }
+
+    @RequestMapping(path = {"/logout"}, method = RequestMethod.POST)
+    public String logout(@CookieValue("ticket") String ticket) {
+        userService.logout(ticket);
+        return "redirect:/";
     }
 
 }
