@@ -3,15 +3,15 @@ package com.wenda.lzy.controller;
 import com.wenda.lzy.model.HostHolder;
 import com.wenda.lzy.model.Question;
 import com.wenda.lzy.service.QuestionService;
+import com.wenda.lzy.service.SensitiveService;
+import com.wenda.lzy.service.UserService;
 import com.wenda.lzy.util.WendaUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
 
@@ -26,6 +26,12 @@ public class QuestionController {
     @Autowired
     HostHolder hostHolder;
 
+    @Autowired
+    SensitiveService sensitiveService;
+
+    @Autowired
+    UserService userService;
+
     @RequestMapping(value = "/question/add", method = {RequestMethod.POST})
     @ResponseBody
     public String addQuestion(@RequestParam("title") String title,
@@ -34,8 +40,8 @@ public class QuestionController {
         try {
             Question question = new Question();
             question.setCreatedDate(new Date());
-            question.setContent(content);
-            question.setTitle(title);
+            question.setContent(sensitiveService.filter(content));
+            question.setTitle(sensitiveService.filter(title));
             if (hostHolder.getUser() == null) {
                 question.setUserId(WendaUtil.ANONYMOUS_USERID);
             } else {
@@ -52,6 +58,14 @@ public class QuestionController {
             logger.error("增加题目失败", e.getMessage());
         }
         return WendaUtil.getJSONString(1, "增加问题失败");
+    }
+
+    @RequestMapping(value = "/question/{qid}", method = {RequestMethod.GET})
+    public String questionDetail(@PathVariable("qid") int qid, Model model) {
+        Question question = questionService.selectQuestionById(qid);
+        model.addAttribute("question", question);
+        model.addAttribute("user", userService.getUser(question.getUserId()));
+        return "detail";
     }
 
 }

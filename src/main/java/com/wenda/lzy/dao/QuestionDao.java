@@ -22,4 +22,7 @@ public interface QuestionDao {
                                         @Param("offset") int offset,
                                         @Param("limit") int limit);
 
+    @Select({"select", SELECT_FIELDS, "from", TABLE_NAME, "where id=#{id}"})
+    Question selectQuestionById(int id);
+
 }
